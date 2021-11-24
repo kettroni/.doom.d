@@ -38,6 +38,9 @@
 ;; This easiers buffer switching
 (global-set-key (kbd "C-M-j") 'counsel-switch-buffer)
 
+;; This makes buffer switching work "correctly"
+(setq doom-unreal-buffer-functions '(minibufferp))
+
 ;; This fulscreens the window
 (toggle-frame-fullscreen)
 ;; Here are some additional functions/macros that could help you configure Doom:
