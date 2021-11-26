@@ -43,6 +43,23 @@
 
 ;; This fulscreens the window
 (toggle-frame-fullscreen)
+
+;; This sets projectile path
+(setq projectile-project-search-path '("~/Projects/"))
+(setq projectile-auto-discover t)
+
+;; TODO: Multiple cursors
+(map! :leader
+      (:prefix-map ("j" . "multiple-cursors")
+        :desc "edit-lines" "e" #'mc/edit-lines
+        :desc "mark-all-like-this" "j" #'mc/mark-all-like-this))
+        ;;:desc "mark-next-like-this" "n" . mc/mark-next-like-this
+        ;;:desc "mark-previous-like-this" "N" . mc/mark-previous-like-this
+
+;; Remap set-mark-command
+ (map! :leader
+       (:prefix-map ("k" . "set-mark-prefix")
+         :desc "edit-lines" "k" #'set-mark-command))
 ;; Here are some additional functions/macros that could help you configure Doom:
 ;;
 ;; - `load!' for loading external *.el files relative to this one
