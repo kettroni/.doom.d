@@ -45,9 +45,16 @@
 (toggle-frame-fullscreen)
 
 ;; This sets projectile path
-(setq projectile-project-search-path '("~/Projects/"))
+(setq projectile-project-search-path '("~/Code"))
 (setq projectile-auto-discover t)
 
+;; This is a dotnet CLI wrapper
+(use-package! sharper
+  :init
+  (map! :leader :prefix ("o" . "open")
+        :desc "sharper" "s" #'sharper-main-transient))
+
+(use-package! protobuf-mode)
 ;; Here are some additional functions/macros that could help you configure Doom:
 ;;
 ;; - `load!' for loading external *.el files relative to this one
