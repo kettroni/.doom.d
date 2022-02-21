@@ -55,6 +55,11 @@
         :desc "sharper" "s" #'sharper-main-transient))
 
 (use-package! protobuf-mode)
+
+(use-package! nasm-mode)
+(add-to-list 'auto-mode-alist '("\\.asm\\'" . nasm-mode))
+
+(require 'dap-netcore)
 ;; Here are some additional functions/macros that could help you configure Doom:
 ;;
 ;; - `load!' for loading external *.el files relative to this one
