@@ -19,8 +19,8 @@
 ;;
 ;; They all accept either a font-spec, font string ("Input Mono-12"), or xlfd
 ;; font string. You generally only need these two:
-;; (setq doom-font (font-spec :family "monospace" :size 12 :weight 'semi-light)
-;;       doom-variable-pitch-font (font-spec :family "sans" :size 13))
+(setq doom-font (font-spec :family "monospace" :size 20 :weight 'semi-light)
+      doom-variable-pitch-font (font-spec :family "sans" :size 23))
 
 ;; There are two ways to load a theme. Both assume the theme is installed and
 ;; available. You can either set `doom-theme' or manually load a theme with the
@@ -60,6 +60,56 @@
 (add-to-list 'auto-mode-alist '("\\.asm\\'" . nasm-mode))
 
 (require 'dap-netcore)
+
+;; SQL stuff
+(require 'ejc-sql)
+(require 'ejc-company)
+(defun k/ejc-after-ejc-mode-hook ()
+  (add-to-list 'company-backend 'ejc-company-backend)
+  ;; In case of `company-mode' is used by default this can be useful:
+  ;; (company-quickhelp-mode)
+  )
+
+(add-hook 'ejc-sql-mode-hook 'k/ejc-after-ejc-mode-hook)
+
+(add-hook 'ejc-sql-minor-mode-hook
+          (lambda ()
+            (company-mode t)))
+(setq ejc-completion-system 'standard)
+
+(defhydra my-mc-hydra (:color pink
+                       :hint nil
+                       :pre (evil-mc-pause-cursors))
+  "
+^Match^            ^Line-wise^           ^Manual^
+^^^^^^----------------------------------------------------
+_g_: match all     _J_: make & go down   _o_: toggle here
+_m_: make & next   _K_: make & go up     _r_: remove last
+_M_: make & prev   ^ ^                   _R_: remove all
+_n_: skip & next   ^ ^                   _p_: pause/resume
+_N_: skip & prev
+
+Current pattern: %`evil-mc-pattern
+
+"
+  ("g" #'evil-mc-make-all-cursors)
+  ("m" #'evil-mc-make-and-goto-next-match)
+  ("M" #'evil-mc-make-and-goto-prev-match)
+  ("n" #'evil-mc-skip-and-goto-next-match)
+  ("N" #'evil-mc-skip-and-goto-prev-match)
+  ("J" #'evil-mc-make-cursor-move-next-line)
+  ("K" #'evil-mc-make-cursor-move-prev-line)
+  ("o" #'+multiple-cursors/evil-mc-toggle-cursor-here)
+  ("r" #'+multiple-cursors/evil-mc-undo-cursor)
+  ("R" #'evil-mc-undo-all-cursors)
+  ("p" #'+multiple-cursors/evil-mc-toggle-cursors)
+  ("q" #'evil-mc-resume-cursors "quit" :color blue)
+  ("<escape>" #'evil-mc-resume-cursors "quit" :color blue))
+
+(map!
+ (:when (featurep! :editor multiple-cursors)
+  :prefix "g"
+  :nv "o" #'my-mc-hydra/body))
 ;; Here are some additional functions/macros that could help you configure Doom:
 ;;
 ;; - `load!' for loading external *.el files relative to this one
