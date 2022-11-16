@@ -19,8 +19,8 @@
 ;;
 ;; They all accept either a font-spec, font string ("Input Mono-12"), or xlfd
 ;; font string. You generally only need these two:
-(setq doom-font (font-spec :family "monospace" :size 20 :weight 'semi-light)
-      doom-variable-pitch-font (font-spec :family "sans" :size 23))
+(setq doom-font (font-spec :family "Fira Code" :size 24 :weight 'medium)
+      doom-variable-pitch-font (font-spec :family "sans" :size 22))
 
 ;; There are two ways to load a theme. Both assume the theme is installed and
 ;; available. You can either set `doom-theme' or manually load a theme with the
@@ -112,6 +112,22 @@ Current pattern: %`evil-mc-pattern
   :nv "o" #'my-mc-hydra/body))
 
 (setq! coding-system-for-write 'utf-8-emacs-unix)
+
+(setq inferior-fsharp-program "/usr/bin/fsharpi --readline-")
+
+;; Set modeline font smaller to fit.
+(setq doom-modeline-height 1)
+(custom-set-faces
+  '(mode-line ((t (:family "Fira Code" :height 0.62))))
+  '(mode-line-active ((t (:family "Fira Code" :height 0.62)))) ; For 29+
+  '(mode-line-inactive ((t (:family "Fira Code" :height 0.62)))))
+
+(set-ligatures! 'csharp-mode
+  :for "foreach")
+
+(let ((ligatures-to-disable '(:true :false :int :float :str :bool :list)))
+  (dolist (sym ligatures-to-disable)
+    (plist-put! +ligatures-extra-symbols sym nil)))
 ;; Here are some additional functions/macros that could help you configure Doom:
 ;;
 ;; - `load!' for loading external *.el files relative to this one
