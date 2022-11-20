@@ -19,7 +19,7 @@
 ;;
 ;; They all accept either a font-spec, font string ("Input Mono-12"), or xlfd
 ;; font string. You generally only need these two:
-(setq doom-font (font-spec :family "Fira Code" :size 24 :weight 'medium)
+(setq doom-font (font-spec :family "Fira Code" :size 20 :weight 'medium)
       doom-variable-pitch-font (font-spec :family "sans" :size 22))
 
 ;; There are two ways to load a theme. Both assume the theme is installed and
@@ -122,12 +122,24 @@ Current pattern: %`evil-mc-pattern
   '(mode-line-active ((t (:family "Fira Code" :height 0.62)))) ; For 29+
   '(mode-line-inactive ((t (:family "Fira Code" :height 0.62)))))
 
-(set-ligatures! 'csharp-mode
-  :for "foreach")
-
 (let ((ligatures-to-disable '(:true :false :int :float :str :bool :list)))
   (dolist (sym ligatures-to-disable)
     (plist-put! +ligatures-extra-symbols sym nil)))
+
+(set-ligatures! 'csharp-mode
+  :for "foreach")
+
+(defun +csharp/open-repl ()
+  (interactive)
+  (vterm)
+  (run-with-idle-timer 1 nil (lambda () (insert "acsharprepl\n")))
+  (current-buffer))
+
+(set-repl-handler! 'csharp-mode #'+csharp/open-repl)
+
+(after! lsp-haskell
+  (setq lsp-haskell-formatting-provider "brittany"))
+(add-to-list '+format-on-save-enabled-modes 'haskell-mode)
 ;; Here are some additional functions/macros that could help you configure Doom:
 ;;
 ;; - `load!' for loading external *.el files relative to this one
