@@ -108,8 +108,8 @@ Current pattern: %`evil-mc-pattern
 
 (map!
  (:when (featurep! :editor multiple-cursors)
-  :prefix "g"
-  :nv "o" #'my-mc-hydra/body))
+   :prefix "g"
+   :nv "o" #'my-mc-hydra/body))
 
 (setq! coding-system-for-write 'utf-8-emacs-unix)
 
@@ -118,9 +118,9 @@ Current pattern: %`evil-mc-pattern
 ;; Set modeline font smaller to fit.
 (setq doom-modeline-height 1)
 (custom-set-faces
-  '(mode-line ((t (:family "Fira Code" :height 0.62))))
-  '(mode-line-active ((t (:family "Fira Code" :height 0.62)))) ; For 29+
-  '(mode-line-inactive ((t (:family "Fira Code" :height 0.62)))))
+ '(mode-line ((t (:family "Fira Code" :height 0.62))))
+ '(mode-line-active ((t (:family "Fira Code" :height 0.62)))) ; For 29+
+ '(mode-line-inactive ((t (:family "Fira Code" :height 0.62)))))
 
 (let ((ligatures-to-disable '(:true :false :int :float :str :bool :list)))
   (dolist (sym ligatures-to-disable)
@@ -129,17 +129,26 @@ Current pattern: %`evil-mc-pattern
 (set-ligatures! 'csharp-mode
   :for "foreach")
 
-(defun +csharp/open-repl ()
-  (interactive)
-  (vterm)
-  (run-with-idle-timer 1 nil (lambda () (insert "acsharprepl\n")))
-  (current-buffer))
+;; If auto formating is annoying :
+;; To enable it, just eval it M-:
+;; (add-hook! 'before-save-hook #'+format/buffer)
+;; (remove-hook! 'before-save-hook #'+format/buffer)
+;; (remove-hook! 'before-save-hook #'ws-butler-before-save)
+(add-hook! 'haskell-mode
+  (format-all-mode -1))
+;;
+;; (defun +csharp/open-repl ()
+;;   (interactive)
+;;   (vterm)
+;;   (run-with-idle-timer 1 nil (lambda () (insert "acsharprepl\n")))
+;;   (current-buffer))
 
-(set-repl-handler! 'csharp-mode #'+csharp/open-repl)
+;; (set-repl-handler! 'csharp-mode #'+csharp/open-repl)
 
-(after! lsp-haskell
-  (setq lsp-haskell-formatting-provider "brittany"))
-(add-to-list '+format-on-save-enabled-modes 'haskell-mode)
+;; (after! lsp-haskell
+;;   (setq lsp-haskell-formatting-provider "brittany"))
+;; (add-to-list '+format-on-save-enabled-modes 'haskell-mode)
+
 ;; Here are some additional functions/macros that could help you configure Doom:
 ;;
 ;; - `load!' for loading external *.el files relative to this one
