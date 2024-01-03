@@ -19,7 +19,7 @@
 ;;
 ;; They all accept either a font-spec, font string ("Input Mono-12"), or xlfd
 ;; font string. You generally only need these two:
-(setq doom-font (font-spec :family "Fira Code" :size 20 :weight 'medium)
+(setq doom-font (font-spec :family "Fira Code" :size 23 :weight 'medium)
       doom-variable-pitch-font (font-spec :family "sans" :size 22))
 
 ;; There are two ways to load a theme. Both assume the theme is installed and
@@ -37,6 +37,10 @@
 
 ;; This easiers buffer switching
 (global-set-key (kbd "C-M-j") 'counsel-switch-buffer)
+
+(map! :after evil
+      :gn "C-+" #'doom/increase-font-size
+      :gn "C-<kp-equal>" #'doom/reset-font-size)
 
 ;; This makes buffer switching work "correctly"
 (setq doom-unreal-buffer-functions '(minibufferp))
@@ -122,7 +126,7 @@ Current pattern: %`evil-mc-pattern
  '(mode-line-active ((t (:family "Fira Code" :height 0.62)))) ; For 29+
  '(mode-line-inactive ((t (:family "Fira Code" :height 0.62)))))
 
-(let ((ligatures-to-disable '(:true :false :int :float :str :bool :list)))
+(let ((ligatures-to-disable '(:true :false :int :float :str :bool :list :lambda :function)))
   (dolist (sym ligatures-to-disable)
     (plist-put! +ligatures-extra-symbols sym nil)))
 
@@ -136,6 +140,7 @@ Current pattern: %`evil-mc-pattern
 ;; (remove-hook! 'before-save-hook #'ws-butler-before-save)
 (add-hook! 'haskell-mode
   (format-all-mode -1))
+
 ;;
 ;; (defun +csharp/open-repl ()
 ;;   (interactive)
@@ -148,7 +153,30 @@ Current pattern: %`evil-mc-pattern
 ;; (after! lsp-haskell
 ;;   (setq lsp-haskell-formatting-provider "brittany"))
 ;; (add-to-list '+format-on-save-enabled-modes 'haskell-mode)
+(setenv "PATH" (concat (getenv "PATH") ":/home/roni/.ghcup/bin/"))
+(setq exec-path (append exec-path '("/home/roni/.ghcup/bin/")))
 
+(defun ap/load-doom-theme (theme)
+  "Disable active themes and load a Doom theme."
+  (interactive (list (intern (completing-read "Theme: "
+                                              (->> (custom-available-themes)
+                                                   (-map #'symbol-name)
+                                                   (--select (string-prefix-p "doom-" it)))))))
+  (ap/switch-theme theme)
+
+  (set-face-foreground 'org-indent (face-background 'default)))
+
+(defun ap/switch-theme (theme)
+  "Disable active themes and load THEME."
+  (interactive (list (intern (completing-read "Theme: "
+                                              (->> (custom-available-themes)
+                                                   (-map #'symbol-name))))))
+  (mapc #'disable-theme custom-enabled-themes)
+  (load-theme theme 'no-confirm))
+
+(use-package! lsp-tailwindcss
+  :init
+  (setq lsp-tailwindcss-add-on-mode t))
 ;; Here are some additional functions/macros that could help you configure Doom:
 ;;
 ;; - `load!' for loading external *.el files relative to this one
