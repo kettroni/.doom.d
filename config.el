@@ -266,7 +266,8 @@ Current pattern: %`evil-mc-pattern
 
 (after! eww
   (map! :map eww-mode-map
-        :n "B" #'my-eww-beautify-source))
+        :n "B" #'my-eww-beautify-source
+        :n "r" #'eww-reload))
 
 ;; clojure
 (defun cider-repl-new-buffer (&optional arg)
@@ -278,7 +279,8 @@ Current pattern: %`evil-mc-pattern
   (map! :leader
         (:prefix ("o" . "open")
          :desc "Open repl in new buffer" "r" #'cider-repl-new-buffer)
-        "l" #'cider-load-buffer))
+        "l" #'cider-load-buffer
+        "y" #'cider-kill-last-result))
 
 ;; Here are some additional functions/macros that could help you configure Doom:
 ;;
