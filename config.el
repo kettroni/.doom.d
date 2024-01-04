@@ -19,7 +19,7 @@
 ;;
 ;; They all accept either a font-spec, font string ("Input Mono-12"), or xlfd
 ;; font string. You generally only need these two:
-(setq doom-font (font-spec :family "Fira Code" :size 23 :weight 'medium)
+(setq doom-font (font-spec :family "Fira Code" :size 21 :weight 'medium)
       doom-variable-pitch-font (font-spec :family "sans" :size 22))
 
 ;; There are two ways to load a theme. Both assume the theme is installed and
@@ -36,7 +36,7 @@
 (setq display-line-numbers-type t)
 
 ;; This easiers buffer switching
-(global-set-key (kbd "C-M-j") 'counsel-switch-buffer)
+(global-set-key (kbd "C-M-h") 'counsel-switch-buffer)
 
 (map! :after evil
       :gn "C-+" #'doom/increase-font-size
@@ -130,9 +130,6 @@ Current pattern: %`evil-mc-pattern
   (dolist (sym ligatures-to-disable)
     (plist-put! +ligatures-extra-symbols sym nil)))
 
-(set-ligatures! 'csharp-mode
-  :for "foreach")
-
 ;; If auto formating is annoying :
 ;; To enable it, just eval it M-:
 ;; (add-hook! 'before-save-hook #'+format/buffer)
@@ -140,15 +137,6 @@ Current pattern: %`evil-mc-pattern
 ;; (remove-hook! 'before-save-hook #'ws-butler-before-save)
 (add-hook! 'haskell-mode
   (format-all-mode -1))
-
-;;
-;; (defun +csharp/open-repl ()
-;;   (interactive)
-;;   (vterm)
-;;   (run-with-idle-timer 1 nil (lambda () (insert "acsharprepl\n")))
-;;   (current-buffer))
-
-;; (set-repl-handler! 'csharp-mode #'+csharp/open-repl)
 
 ;; (after! lsp-haskell
 ;;   (setq lsp-haskell-formatting-provider "brittany"))
@@ -177,6 +165,121 @@ Current pattern: %`evil-mc-pattern
 (use-package! lsp-tailwindcss
   :init
   (setq lsp-tailwindcss-add-on-mode t))
+
+;; harpoon
+(setq harpoon-project-package '+workspace-current-name)
+(setq harpoon-without-project-function '+workspace-current-name)
+(map! "C-1" 'harpoon-go-to-1
+      "C-2" 'harpoon-go-to-2
+      "C-3" 'harpoon-go-to-3
+      "C-4" 'harpoon-go-to-4
+      "C-5" 'harpoon-go-to-5
+      ;; TODO: fix this.
+      ;; "C-6" 'harpoon-go-to-6
+      "C-7" 'harpoon-go-to-7
+      "C-8" 'harpoon-go-to-8
+      "C-9" 'harpoon-go-to-9
+      "C-0" 'harpoon-clear
+
+      ;; Alternative for faster changing.
+      "C-k" 'harpoon-go-to-1
+      "C-j" 'harpoon-go-to-2
+      "C-q" 'harpoon-go-to-3
+      "C-'" 'harpoon-go-to-4
+
+      :leader "a" 'harpoon-add-file
+      :leader "u" 'harpoon-toggle-file)
+
+(map! :nvig "C-<tab>" #'+workspace/switch-right)
+(map! :nvig "C-<iso-lefttab>" #'+workspace/switch-left)
+
+;; magit
+(map! :nvg "M-g" #'magit-status)
+
+;; compile
+(map! :nvg "C-M-c" #'+ivy/project-compile)
+
+(defun compile-maximize ()
+  "Execute a compile command from the current project's root and maximizes window."
+  (interactive)
+  (recompile)
+  (doom/window-maximize-buffer))
+
+(map! :nvg "M-C" #'compile-maximize)
+
+(defun eval-surrounding-or-next-clojure ()
+  "Evaluates surrounding clojure if found, otherwise the next clojure."
+  (interactive)
+  (save-excursion
+    (let ((original-point (point)))
+      (evil-visual-char)
+      (call-interactively #'evil-a-paren)
+      (call-interactively #'+eval:region)
+      (goto-char original-point))))
+
+(map! :leader "e" #'eval-surrounding-or-next-clojure)
+
+;; csharp
+;; (defun +csharp/open-repl ()
+;;   (interactive)
+;;   (call-interactively #'+vterm/here)
+;;   (run-with-idle-timer 1 nil (lambda () (insert "acsharprepl\n")))
+;;   (current-buffer)
+;;   )
+
+;; (defun start-csharp-repl-vterm ()
+;;   "Start a C# REPL using csharepl in vterm."
+;;   (interactive)
+;;   (let* ((vterm-buffer-name "*vterm-csharp*")
+;;          (default-directory default-directory))
+;;     (unless (get-buffer vterm-buffer-name)
+;;       (vterm vterm-buffer-name))
+;;     (with-current-buffer vterm-buffer-name
+;;       (vterm-send-string (concat "csharprepl " (buffer-file-name) "\n")))))
+
+;; (after! csharp-mode
+;;   (set-repl-handler! 'csharp-mode #'start-csharp-repl-buffer))
+
+(set-ligatures! 'csharp-mode
+  :for "foreach")
+
+;; eww
+(defun my-eww-beautify-source ()
+  "Beautify HTML source in eww-view-source buffer."
+  (interactive)
+  (eww-view-source)
+  (when (eq major-mode 'mhtml-mode)
+    (setq buffer-read-only nil)
+    (web-beautify-html)
+    (setq buffer-read-only t)
+    (message "Beautified HTML source in eww-view-source buffer.")))
+
+(defun eww-open-dev-server ()
+  "Open EWW browser for localhost:6969."
+  (interactive)
+  (eww "http://localhost:6969/")
+  (call-interactively #'+popup/raise))
+
+(map! :leader
+      (:prefix ("o" . "open")
+       :desc "Open localhost:6969 in EWW" "w" #'eww-open-dev-server))
+
+(after! eww
+  (map! :map eww-mode-map
+        :n "B" #'my-eww-beautify-source))
+
+;; clojure
+(defun cider-repl-new-buffer (&optional arg)
+  "Wrapper for `cider-jack-in-clj' that avoids splitting the window."
+  (interactive "P")
+  (+eval-open-repl arg #'get-buffer-create))
+
+(after! cider
+  (map! :leader
+        (:prefix ("o" . "open")
+         :desc "Open repl in new buffer" "r" #'cider-repl-new-buffer)
+        "l" #'cider-load-buffer))
+
 ;; Here are some additional functions/macros that could help you configure Doom:
 ;;
 ;; - `load!' for loading external *.el files relative to this one
