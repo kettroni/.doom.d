@@ -187,9 +187,19 @@ Current pattern: %`evil-mc-pattern
       "C-q" 'harpoon-go-to-3
       "C-'" 'harpoon-go-to-4
 
-      :leader "a" 'harpoon-add-file
-      :leader "u" 'harpoon-toggle-file)
+      :leader "a" 'harpoon-add-file)
 
+(defun entry-or-exit-harpoon ()
+  (interactive)
+  (if (eq major-mode 'harpoon-mode)
+      (progn
+        (basic-save-buffer)
+        (+popup/close))
+    (harpoon-toggle-file)
+    (+popup/buffer)))
+(map! :leader "u" #'entry-or-exit-harpoon)
+
+;; workspace
 (map! :nvig "C-<tab>" #'+workspace/switch-right)
 (map! :nvig "C-<iso-lefttab>" #'+workspace/switch-left)
 
@@ -206,18 +216,6 @@ Current pattern: %`evil-mc-pattern
   (doom/window-maximize-buffer))
 
 (map! :nvg "M-C" #'compile-maximize)
-
-(defun eval-surrounding-or-next-clojure ()
-  "Evaluates surrounding clojure if found, otherwise the next clojure."
-  (interactive)
-  (save-excursion
-    (let ((original-point (point)))
-      (evil-visual-char)
-      (call-interactively #'evil-a-paren)
-      (call-interactively #'+eval:region)
-      (goto-char original-point))))
-
-(map! :leader "e" #'eval-surrounding-or-next-clojure)
 
 ;; csharp
 ;; (defun +csharp/open-repl ()
@@ -270,10 +268,23 @@ Current pattern: %`evil-mc-pattern
         :n "r" #'eww-reload))
 
 ;; clojure
-(defun cider-repl-new-buffer (&optional arg)
+(defun eval-surrounding-or-next-closure ()
+  "Evaluates surrounding closure if found, otherwise the next closure."
+  (interactive)
+  (save-excursion
+    (let ((original-point (point)))
+      (evil-visual-char)
+      (call-interactively #'evil-a-paren)
+      (call-interactively #'+eval:region)
+      (goto-char original-point))))
+
+(map! :leader "e" #'eval-surrounding-or-next-closure)
+
+(defun cider-repl-new-buffer ()
   "Wrapper for `cider-jack-in-clj' that avoids splitting the window."
-  (interactive "P")
-  (+eval-open-repl arg #'get-buffer-create))
+  (interactive)
+  (+eval/open-repl-same-window)
+  (switch-to-buffer (other-buffer)))
 
 (after! cider
   (map! :leader
@@ -282,6 +293,36 @@ Current pattern: %`evil-mc-pattern
         "l" #'cider-load-buffer
         "y" #'cider-kill-last-result))
 
+;; (defun wrap-closure-insert ()
+;;   "Wraps the surrounding closure with new paranthesis and starts inserting."
+;;   (interactive)
+;;   (evil-visual-char)
+;;   (call-interactively #'evil-a-paren)
+;;   (call-interactively #'evil-surround-region))
+
+(defun wrap-closure-insert ()
+  "Wraps the surrounding closure with new parentheses and starts inserting."
+  (interactive)
+  (evil-visual-char)
+  (call-interactively #'evil-a-paren)
+  (evil-surround-region (region-beginning) (region-end) ?\( ?\))
+  (evil-insert 1)
+  (evil-forward-char))
+
+(map! "C-)" #'wrap-closure-insert)
+
+;; doom
+(defun open-doom-scratch-buffer-maximized ()
+  "Open or close the *doom:scratch* buffer and maximize it."
+  (interactive)
+  (if (get-buffer-window "*doom:scratch*")
+      (switch-to-buffer (other-buffer))
+    (doom/open-scratch-buffer)
+    (call-interactively #'+popup/raise)))
+
+(map! :leader "x" #'open-doom-scratch-buffer-maximized)
+
+;;
 ;; Here are some additional functions/macros that could help you configure Doom:
 ;;
 ;; - `load!' for loading external *.el files relative to this one
